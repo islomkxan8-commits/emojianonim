@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="uz"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Emoji yaratish</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="config.js"></script>
+<script src="lottie.min.js"></script>
+<style>
+:root{--bg:#08080a;--s1:#111114;--s2:#1b1b20;--ln:#2a2a31;--tx:#f3f3ef;--hint:#8d8d96;--ac:#9b8cff;--r:16px;--btn:var(--ac);--sec:var(--s1);--g:var(--ac)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}html{background:var(--bg)}
+body{font:15px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);padding:0 14px calc(100px + env(safe-area-inset-bottom));overflow-x:hidden;min-height:100vh}
+.grain{position:fixed;inset:-50%;z-index:50;pointer-events:none;opacity:.07;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain .8s steps(6) infinite}
+@keyframes grain{20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}}
+.spot{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(440px circle at var(--x,50%) var(--y,18%),#9b8cff1f,transparent 70%)}
+.top{display:flex;align-items:center;gap:12px;padding:16px 0 6px}
+.top img{width:52px;height:52px;border-radius:50%;border:2px solid var(--ac);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #9b8cff77}70%,100%{box-shadow:0 0 0 14px #9b8cff00}}
+.top b{position:relative;font-size:19px;letter-spacing:.14em}.top small{display:block;color:var(--hint);font-size:12px}
+.glitch:before,.glitch:after{content:attr(data-t);position:absolute;left:0;top:0;opacity:0}
+.glitch:before{color:var(--ac);animation:gl 5s infinite}.glitch:after{color:#fff;animation:gl 5s infinite .15s}
+@keyframes gl{0%,92%,100%{opacity:0}93%{opacity:.9;transform:translate(-2px,1px);clip-path:inset(20% 0 55% 0)}96%{opacity:.9;transform:translate(2px,-1px);clip-path:inset(60% 0 10% 0)}}
+nav{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;padding:5px;border-radius:99px;background:#111114e8;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--ln);box-shadow:0 10px 40px #000a;z-index:9;max-width:calc(100% - 16px)}
+nav .pill{position:absolute;top:5px;bottom:5px;left:0;border-radius:99px;background:var(--ac);transition:transform .35s cubic-bezier(.3,1.3,.5,1),width .35s;box-shadow:0 0 20px #9b8cff66}
+nav button{position:relative;z-index:1;padding:10px 12px;border:0;background:none;color:var(--hint);font:inherit;font-weight:600;font-size:14px;white-space:nowrap;transition:color .25s}nav button.on{color:#101126}
+section{animation:in .4s cubic-bezier(.2,.8,.2,1)}@keyframes in{from{opacity:0;transform:translateY(14px)}}
+.card,.stats,.me{animation:in .5s both}.card:nth-child(2){animation-delay:.06s}.card:nth-child(3){animation-delay:.12s}.card:nth-child(4){animation-delay:.18s}.card:nth-child(5){animation-delay:.24s}
+.stage{position:relative;width:min(100%,300px);aspect-ratio:1;margin:12px auto 16px;border-radius:28px;border:2px solid transparent;background:radial-gradient(circle at 30% 20%,#25252b,#050507) padding-box,conic-gradient(from var(--a),var(--ac),#fff,#333,var(--ac)) border-box;animation:spin 5s linear infinite;box-shadow:0 0 50px #9b8cff26;display:grid;gap:4px;padding:10px;place-items:center;color:var(--hint);text-align:center;font-size:13px;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));overflow:hidden}
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false}@keyframes spin{to{--a:360deg}}
+.stage .cell{width:100%;aspect-ratio:1;animation:pop .45s cubic-bezier(.3,1.5,.5,1)}@keyframes pop{from{transform:scale(.5) rotate(-8deg);opacity:0}}
+.stage.one{display:block;padding:14px}.stage.one .cell{height:100%}
+.stage.load:after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,#9b8cff22 50%,transparent 70%);animation:sh 1.1s infinite}@keyframes sh{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+label{display:block;margin:14px 0 6px;color:var(--hint);font-size:13px}
+input[type=text],input[type=number],select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--ln);border-radius:var(--r);background:var(--s1);color:var(--tx);font:inherit;transition:.2s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 4px #9b8cff22}input[type=range]{accent-color:var(--ac)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button,.sub button{padding:8px 13px;border:1px solid var(--ln);border-radius:99px;background:var(--s1);color:var(--tx);font:inherit;white-space:nowrap;transition:.2s}
+.chips button:active,.sub button:active{transform:scale(.92)}.chips button.on,.sub button.on{background:var(--ac);color:#101126;border-color:var(--ac);font-weight:600;box-shadow:0 0 16px #9b8cff44}
+.sub{display:flex;gap:6px;overflow-x:auto;padding:4px 0 2px;scrollbar-width:none}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+input[type=color]{height:46px;padding:3px;border-radius:var(--r);border:1.5px solid var(--ln);background:var(--s1);flex:none;width:64px}
+.go{position:relative;overflow:hidden;width:100%;margin-top:18px;padding:15px;border:0;border-radius:var(--r);background:#f3f3ef;color:#101126;font:inherit;font-weight:800;font-size:16px;letter-spacing:.02em;transition:transform .15s,box-shadow .2s;box-shadow:0 6px 30px #9b8cff30}
+.go:after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,#9b8cff99,transparent);transform:skewX(-20deg);animation:shine 3s infinite}@keyframes shine{55%,100%{left:140%}}
+.go:active{transform:scale(.96)}.go:disabled{opacity:.5}.price{text-align:center;margin-top:12px;color:var(--hint)}
+.card{background:var(--s1);border:1px solid var(--ln);border-radius:var(--r);padding:14px;margin-top:12px;transition:border-color .25s}.card:hover{border-color:#9b8cff55}.card h3{font-size:15px;margin-bottom:8px}
+.card small,.stats small,.me small{color:var(--hint)}
+.btn2{padding:10px 14px;border:1.5px solid var(--ac);border-radius:var(--r);background:transparent;color:var(--ac);font:inherit;font-weight:600;flex:none;transition:.2s}.btn2:active{transform:scale(.94);background:var(--ac);color:#101126}
+.tag{display:inline-flex;gap:6px;background:var(--s2);border-radius:99px;padding:4px 10px;margin:3px 4px 0 0}.tag b{cursor:pointer;color:var(--hint)}
+.me{text-align:center;margin:18px 0 14px}.ava{width:92px;height:92px;margin:0 auto 10px;border-radius:50%;padding:3px;background:var(--ac);display:grid;place-items:center;font-size:36px;font-weight:800;color:#101126;overflow:hidden;box-shadow:0 0 40px #9b8cff44}.ava img{width:100%;height:100%;border-radius:50%;object-fit:cover}.me h2{font-size:21px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.stats.k4{grid-template-columns:repeat(4,1fr)}.stats div{background:var(--s1);border:1px solid var(--ln);border-radius:var(--r);padding:12px 4px;text-align:center}.stats b{display:block;font-size:21px;color:var(--ac)}
+.lb{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--ln)}.lb:last-child{border:0}.lb span{width:22px;color:var(--hint)}.lb:first-child span{color:var(--ac);font-weight:800}.lb b{flex:1;font-weight:600}.lb em{color:var(--ac);font-style:normal}
+.dots{display:flex;gap:8px;margin:12px 0}.dots i{flex:1;height:10px;border-radius:9px;background:var(--s2);transition:.4s}.dots i.on{background:var(--ac);box-shadow:0 0 14px var(--ac)}
+.cf{position:fixed;top:-30px;font-size:22px;z-index:99;pointer-events:none;animation:fall 1.8s ease-in forwards}@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+nav button span{display:none}nav button.on span{display:inline}nav button b{font-size:17px}.lb .btn2{flex:none;padding:6px 12px}
+.dust{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}.dust i{position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;background:var(--ac);opacity:0;animation:up linear infinite}
+@keyframes up{10%{opacity:.7}to{transform:translateY(-105vh) translateX(var(--dx));opacity:0}}
+.rip{position:absolute;border-radius:50%;background:#9b8cff55;transform:scale(0);animation:rp .6s ease-out forwards;pointer-events:none}@keyframes rp{to{transform:scale(4);opacity:0}}
+.lb{animation:in .4s both}.lb:nth-child(2){animation-delay:.05s}.lb:nth-child(3){animation-delay:.1s}.lb:nth-child(4){animation-delay:.15s}.lb:nth-child(5){animation-delay:.2s}.lb:nth-child(6){animation-delay:.25s}.lb.me2{background:#9b8cff14;border-radius:10px}
+.stage,.prize{transition:transform .15s ease-out;will-change:transform}
+.prize{position:relative;margin-top:14px;text-align:center;padding:18px 14px;border-radius:22px;border:2px solid transparent;background:linear-gradient(var(--s1),var(--s1)) padding-box,conic-gradient(from var(--a),var(--ac),#fff,#222,var(--ac)) border-box;animation:spin 4s linear infinite,in .5s both;box-shadow:0 0 40px #9b8cff22}
+.prize .gift{font-size:54px;display:inline-block;animation:bob 2.2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-8px) rotate(6deg)}}
+.cd{display:flex;gap:8px;justify-content:center;margin:12px 0}.cd div{min-width:58px;background:var(--s2);border-radius:12px;padding:8px 4px}.cd b{display:block;font-size:24px;color:var(--ac);font-variant-numeric:tabular-nums}.cd small{color:var(--hint);font-size:11px}
+.bar{height:10px;border-radius:9px;background:var(--s2);overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;width:0;border-radius:9px;background:var(--ac);box-shadow:0 0 12px var(--ac);transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.banner{display:block;width:100%;margin-top:6px;padding:10px 14px;border:1px solid #9b8cff55;border-radius:99px;background:linear-gradient(90deg,#9b8cff14,#9b8cff40,#9b8cff14);background-size:200% 100%;animation:mq 3s linear infinite;color:var(--tx);font:inherit;font-size:13px}@keyframes mq{to{background-position:-200% 0}}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}.pick button{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:22px 12px;border:1.5px solid var(--ln);border-radius:22px;background:var(--s1);color:var(--tx);font:inherit;transition:.25s;animation:in .5s both}.pick button:nth-child(2){animation-delay:.1s}.pick button b{font-size:44px;transition:.3s}.pick button:active{transform:scale(.95)}.pick button:hover{border-color:var(--ac);box-shadow:0 0 30px #9b8cff33}.pick button:hover b{transform:scale(1.15) rotate(-6deg)}.pick small{color:var(--hint)}
+.seg{display:flex;gap:6px;margin:10px 0 2px;padding:4px;border-radius:99px;background:var(--s1);border:1px solid var(--ln)}.seg button{flex:1;padding:10px;border:0;border-radius:99px;background:none;color:var(--hint);font:inherit;font-weight:600;transition:.25s}.seg button.on{background:var(--ac);color:#101126;box-shadow:0 0 16px #9b8cff44}
+.tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:236px;overflow-y:auto;padding:4px;scrollbar-width:thin}
+.tcard{position:relative;aspect-ratio:1;padding:3px;border:1.5px solid var(--ln);border-radius:14px;background:var(--s1);color:var(--hint);transition:.2s}.tcard[hidden]{display:none}.tcard:active{transform:scale(.92)}.tcard.on{border-color:var(--ac);box-shadow:0 0 16px #9b8cff55;background:#9b8cff10}.tcard .th{width:100%;height:100%;display:grid;place-items:center;text-align:center}.tcard small{font-size:10px;animation:blink 1.2s infinite}@keyframes blink{50%{opacity:.35}}
+.stp div{display:flex;gap:10px;align-items:center;padding:7px 0}.stp b{width:26px;height:26px;border-radius:50%;background:var(--ac);color:#101126;display:grid;place-items:center;flex:none}.big{font-size:44px;color:var(--ac);line-height:1}.mk{animation:in .35s both}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}.kpi{position:relative;overflow:hidden;background:linear-gradient(145deg,var(--s1),var(--s2));border:1px solid var(--ln);border-radius:var(--r);padding:14px;animation:in .5s both}.kpi i{position:absolute;right:10px;top:6px;font-size:30px;opacity:.25;font-style:normal}.kpi b{display:block;font-size:28px;color:var(--ac)}.kpi small{color:var(--hint)}
+.chart{display:flex;gap:6px;align-items:flex-end;height:140px;padding-top:18px}.chart>div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}.chart i{position:relative;width:100%;height:var(--h);min-height:4px;border-radius:8px 8px 3px 3px;background:linear-gradient(var(--ac),#4d7a0a);transform-origin:bottom;animation:grow .8s cubic-bezier(.2,.8,.2,1) both}.chart i b{position:absolute;top:-17px;left:0;right:0;text-align:center;font-size:11px;color:var(--hint)}@keyframes grow{from{transform:scaleY(0)}}.chart small{font-size:10px;color:var(--hint)}
+.adm-h{display:flex;justify-content:space-between;align-items:center;padding:14px 0 4px}.adm-h b{font-size:20px}.adm-h small{background:var(--ac);color:#101126;border-radius:99px;padding:3px 10px;font-weight:700}.lb em.done{color:var(--ac)}
+.sw{position:relative;width:54px;height:30px;border-radius:99px;background:var(--s2);border:1px solid var(--ln);transition:.3s;flex:none!important}.sw:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.3s}.sw.on{background:var(--ac)}.sw.on:after{left:27px;background:#101126}
+.pod{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:10px 0}.pod>div{flex:1;min-width:0;text-align:center;border-radius:14px 14px 0 0;padding:10px 4px;background:var(--s2);display:flex;flex-direction:column;gap:2px;animation:in .6s both}.pod .p1{min-height:118px;background:linear-gradient(var(--s2),#9b8cff22);border:1px solid #9b8cff66}.pod .p2{min-height:92px}.pod .p3{min-height:76px}.pod i{font-size:26px;font-style:normal}.pod b{font-size:12px;overflow:hidden;text-overflow:ellipsis}.pod em{color:var(--ac);font-style:normal;font-weight:700}
+.st{display:flex;align-items:center;gap:10px;font-size:16px;margin:20px 0 8px}.st i{width:28px;height:28px;border-radius:50%;background:var(--ac);color:#101126;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:14px;box-shadow:0 0 14px #9b8cff66;flex:none}.cta{text-align:center;margin-top:18px}.cta .go{margin-top:6px}
+.hide{display:none}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* ANONIM EMOJI — refreshed glass / aurora interface */
+:root{
+ --bg:#080914;--s1:#111426;--s2:#1a2038;--ln:#2b3453;--tx:#f5f6ff;--hint:#9ba5c5;
+ --ac:#9b8cff;--r:20px;--btn:#9b8cff;--sec:#111426;--g:#9b8cff;
+ color-scheme:dark;
+}
+html{background:var(--bg)}
+body{background:radial-gradient(ellipse at 50% -12%,#40358b55 0,transparent 42%),radial-gradient(ellipse at 100% 42%,#176b8a22 0,transparent 38%),var(--bg);padding-left:16px;padding-right:16px}
+body:before,body:after{content:"";position:fixed;z-index:-1;pointer-events:none;border-radius:50%;filter:blur(70px);opacity:.23;animation:aurora 12s ease-in-out infinite alternate}
+body:before{width:230px;height:230px;left:-130px;top:22%;background:#7865ff}
+body:after{width:210px;height:210px;right:-130px;top:62%;background:#16c7d8;animation-delay:-5s}
+@keyframes aurora{to{transform:translate(55px,-35px) scale(1.22)}}
+.grain{opacity:.035}
+.top{padding:20px 2px 14px;gap:14px}
+.top img{width:54px;height:54px;border:2px solid #a99cff;box-shadow:0 0 28px #9b8cff44}
+.top b{font-size:18px;letter-spacing:.11em}
+.top small{margin-top:3px;letter-spacing:.02em}
+nav{bottom:calc(14px + env(safe-area-inset-bottom));padding:6px;background:#111629dd;border:1px solid #414b70;border-radius:22px;box-shadow:0 14px 45px #0009,0 0 24px #8b7cff18}
+nav .pill{background:linear-gradient(120deg,#b3a8ff,#7b8cff);box-shadow:0 5px 18px #8878ff66}
+nav button{padding:11px 13px;border-radius:16px;font-size:13px}
+nav button.on{color:#101126}
+section{animation:section-enter .48s cubic-bezier(.2,.8,.2,1)}
+@keyframes section-enter{from{opacity:0;transform:translateY(18px) scale(.99)}to{opacity:1;transform:none}}
+.pick{gap:12px}
+.pick button{border:1px solid #343d60!important;border-radius:22px!important;background:linear-gradient(145deg,#171d35,#101426)!important;box-shadow:0 12px 30px #0003;transition:transform .25s,border-color .25s,box-shadow .25s}
+.pick button:active{transform:scale(.97)}
+.pick button b{filter:drop-shadow(0 5px 12px #9b8cff55)}
+.seg{padding:5px;border:1px solid var(--ln);border-radius:18px;background:#101528}
+.seg button{border-radius:14px!important}
+.stage{border-radius:30px!important;background:radial-gradient(circle at 30% 20%,#2a3152,#0a0d1b) padding-box,conic-gradient(from var(--a),#9b8cff,#56d6e8,#f3a7ff,#9b8cff) border-box!important;box-shadow:0 20px 55px #0006,0 0 38px #8878ff1c!important}
+.card,.stats div{background:linear-gradient(145deg,#171d33ed,#101426ed);border:1px solid #303a5b;border-radius:20px;box-shadow:0 12px 30px #0002}
+.card:hover{border-color:#9b8cff88;transform:translateY(-2px)}
+input[type=text],input[type=number],select,textarea{background:#101629;border:1px solid #343e60;border-radius:16px;padding:14px 15px}
+input:focus,select:focus,textarea:focus{border-color:#a99cff;box-shadow:0 0 0 4px #9b8cff20}
+.chips button,.sub button{background:#141a30;border:1px solid #394365;border-radius:14px}
+.chips button.on,.sub button.on{background:linear-gradient(120deg,#b4aaff,#8295ff);color:#101126;border-color:transparent;box-shadow:0 7px 20px #8878ff33}
+.go{border-radius:17px;background:linear-gradient(110deg,#b9afff,#8e9cff 55%,#67d7e7);color:#101126;box-shadow:0 10px 28px #8377ff38;font-weight:850}
+.go:after{background:linear-gradient(100deg,transparent,#ffffffa8,transparent)}
+.btn2{border-color:#a99cff;color:#c3baff;border-radius:15px}
+.ava{background:linear-gradient(135deg,#b9afff,#66d6e8);box-shadow:0 0 35px #9b8cff44}
+.stats b,.lb em{color:#b7adff}
+.tag{background:#252c49;border:1px solid #374263}
+.dots i.on{background:#a99cff;box-shadow:0 0 14px #9b8cff}
+.st i{background:linear-gradient(135deg,#b9afff,#7d92ff);color:#111329;box-shadow:0 0 16px #9b8cff44}
+.lb{border-bottom-color:#29324e}
+.lb:first-child span{color:#b7adff}
+.lb.me2{background:#9b8cff16}
+.prize{background:linear-gradient(#151a30,#151a30) padding-box,conic-gradient(from var(--a),#9b8cff,#56d6e8,#f3a7ff,#9b8cff) border-box}
+.spot{background:radial-gradient(440px circle at var(--x,50%) var(--y,18%),#9b8cff18,transparent 70%)}
+.cf{filter:drop-shadow(0 2px 5px #9b8cff55)}
+@media(min-width:700px){body{max-width:620px;margin:0 auto}.top{padding-top:28px}.stage{max-width:340px}}
+@media(prefers-reduced-motion:reduce){body:before,body:after{animation:none}}
+
+/* ANONIM EMOJI opening screen */
+#intro-screen{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;
+  overflow:hidden;background:#000;opacity:1;visibility:visible;
+  transition:opacity .65s ease,visibility .65s ease}
+#intro-screen::before{content:"";position:absolute;width:min(78vw,420px);aspect-ratio:1;
+  border-radius:50%;background:radial-gradient(circle,#fff 0%,#aaa 13%,#555 28%,transparent 68%);
+  filter:blur(42px);opacity:.16;animation:intro-aura 2.4s ease-in-out infinite alternate}
+#intro-screen .intro-mark{position:relative;width:min(78vw,520px);height:auto;object-fit:contain;
+  opacity:0;transform:translateY(24px) scale(.78);
+  filter:drop-shadow(0 0 0 rgba(255,255,255,0));
+  animation:intro-reveal 1.15s cubic-bezier(.16,1,.3,1) .12s forwards,
+            intro-float 2.1s ease-in-out 1.25s infinite}
+#intro-screen .intro-ring{position:absolute;width:min(88vw,590px);aspect-ratio:1;border-radius:50%;
+  border:1px solid rgba(255,255,255,.16);transform:scale(.72);opacity:0;
+  animation:intro-ring 1.45s ease-out .25s forwards}
+#intro-screen .intro-caption{position:absolute;bottom:calc(12vh + env(safe-area-inset-bottom));
+  color:rgba(255,255,255,.82);font:600 11px/1.2 system-ui,sans-serif;
+  letter-spacing:.42em;text-indent:.42em;opacity:0;animation:intro-caption .7s ease 1s forwards}
+#intro-screen.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+@keyframes intro-reveal{to{opacity:1;transform:translateY(0) scale(1);
+  filter:drop-shadow(0 0 26px rgba(255,255,255,.18))}}
+@keyframes intro-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-9px) scale(1.012)}}
+@keyframes intro-ring{0%{opacity:0;transform:scale(.72)}35%{opacity:.55}100%{opacity:0;transform:scale(1.18)}}
+@keyframes intro-aura{from{transform:scale(.82);opacity:.1}to{transform:scale(1.12);opacity:.25}}
+@keyframes intro-caption{to{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+ #intro-screen *,#intro-screen::before{animation:none!important}
+ #intro-screen .intro-mark{opacity:1;transform:none}
+ #intro-screen .intro-caption{opacity:1}
+}
+
+</style></head><body>
+
+<div id="intro-screen" aria-label="ANONIM EMOJI">
+  <div class="intro-ring"></div>
+  <img class="intro-mark" src="opening-mark.jpg" alt="ANONIM EMOJI belgisi">
+  <div class="intro-caption">ANONIM EMOJI</div>
+</div>
+<script>
+(function(){
+  var intro=document.getElementById('intro-screen');
+  if(!intro) return;
+  var closeIntro=function(){
+    if(intro.classList.contains('is-leaving')) return;
+    intro.classList.add('is-leaving');
+    window.setTimeout(function(){ if(intro.parentNode) intro.parentNode.removeChild(intro); },700);
+  };
+  window.setTimeout(closeIntro,2600);
+  intro.addEventListener('click',closeIntro,{once:true});
+})();
+</script>
+
+<div class="grain"></div><div class="spot"></div>
+<header class="top"><img src="avatar.jpg" alt=""><div><b class="glitch" data-t="ANONIM EMOJI">ANONIM EMOJI</b><small>animatsiyali premium emoji studiyasi</small></div></header>
+<nav><i class="pill"></i><button data-t="make" class="on"><b>✨</b><span> Yasash</span></button><button data-t="rank"><b>🏆</b><span> Konkurs</span></button><button data-t="profile"><b>👤</b><span> Profil</span></button><button data-t="admin" class="hide"><b>🛠</b></button></nav>
+
+<section id="make">
+ <div id="mk-pick"><label style="text-align:center;margin-top:18px">Nimani yasaymiz?</label><div class="pick"><button data-m="name"><b>✍️</b><h3>Ism emoji</h3><small>Ismingiz animatsiyali emoji bo'ladi</small></button><button data-m="logo"><b>🎨</b><h3>Logo emoji</h3><small>Matn va ranglardan logo</small></button></div></div>
+ <div id="mk-body" class="hide">
+  <div class="seg"><button data-m="name">✍️ Ism emoji</button><button data-m="logo">🎨 Logo emoji</button></div>
+  <div class="mk hide" id="name">
+   <div class="stage one" id="st-name">Yuklanmoqda…</div>
+   <h3 class="st"><i>1</i>Shablonni tanlang</h3><div class="tgrid" id="tpls"></div>
+   <h3 class="st"><i>2</i>So'zni kiriting</h3><input type="text" id="word" placeholder="Masalan: Anvar">
+   <h3 class="st"><i>3</i>To'plam sozlamalari</h3><label>To'plam nomi (Telegramda ko'rinadi)</label><input type="text" id="n-title" maxlength="64" placeholder="Mening emojilarim">
+   <label>Qayerga qo'shamiz</label><div class="chips" id="packs"><button data-v="emoji" class="on">Premium emoji</button><button data-v="sticker">Stikerlar</button></div>
+   <div class="card cta"><h3>Emoji tayyormi?</h3><div class="price" id="n-price"></div><button class="go" id="n-go">Buyurtma berish</button></div>
+  </div>
+  <div class="mk hide" id="logo">
+   <div class="stage one" id="st-logo">Yuklanmoqda…</div>
+   <h3 class="st"><i>1</i>Shablonni tanlang · <b id="l-num">1</b></h3><input type="text" id="l-q" inputmode="numeric" placeholder="Raqam bo'yicha qidirish"><input type="hidden" id="l-n" value="1">
+   <div class="tgrid" id="lgrid" style="margin-top:8px"></div>
+   <h3 class="st"><i>2</i>Matn va shrift</h3><label>Matn</label><input type="text" id="l-text" maxlength="20" placeholder="Masalan: Salom">
+   <label>Shrift</label><select id="l-font"></select>
+   <h3 class="st"><i>3</i>Ranglarni sozlash</h3><label>Ranglar: tashqi · ichki · logo</label><div class="row"><input type="color" id="c-out" value="#e53935"><input type="color" id="c-in" value="#000000"><input type="color" id="c-logo" value="#ffffff"></div>
+   <label>To'plam nomi</label><input type="text" id="l-title" maxlength="64" placeholder="Mening logolarim">
+   <div class="card cta"><h3>Emoji tayyormi?</h3><div class="price" id="l-price"></div><button class="go" id="l-go">Buyurtma berish</button></div>
+  </div>
+ </div>
+</section>
+<section id="rank" class="hide"></section>
+<section id="profile" class="hide"><div id="pf"></div><div id="pf2"></div></section>
+<section id="admin" class="hide"></section>
+<script>
+const tg=Telegram.WebApp;tg.ready();tg.expand();
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let cfg,anims=[],seq=0,tpl='all',packKind='emoji',timers={};
+async function api(p,b){const r=await fetch((window.API_BASE||'')+p,{method:'POST',headers:{'X-Init-Data':tg.initData,'Content-Type':'application/json'},body:JSON.stringify(b||{})});
+ const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||r.statusText);e.data=j;throw e}return j}
+function show(st,anim){anims.forEach(a=>a.destroy());anims=[];st.innerHTML='';st.className='stage'+(anim.length==1?' one':'');
+ anim.forEach(d=>{const c=document.createElement('div');c.className='cell';st.appendChild(c);anims.push(lottie.loadAnimation({container:c,renderer:'svg',loop:true,autoplay:true,animationData:d}))})}
+function debounced(k,fn){clearTimeout(timers[k]);timers[k]=setTimeout(fn,450)}
+async function preview(body,st){const my=++seq;st.classList.add('load');if(!st.querySelector('.cell')){st.className='stage one load';st.textContent='Yuklanmoqda…'}try{const j=await api('/api/preview',body);if(my===seq)show(st,j.anims)}catch(e){if(my===seq){anims=[];st.className='stage one';st.textContent=e.message}}}
+function prices(){const k=$('#name').classList.contains('hide')?'logo':'name';
+ const n=k==='name'&&tpl==='all'?cfg.templates.length:1,p=cfg.prices[k]*n;
+ const t=cfg.free?'Siz uchun bepul':p+' ⭐'+(n>1?' ('+n+' ta × '+cfg.prices[k]+')':'');
+ $('#n-price').textContent=$('#l-price').textContent=t}
+const nameBody=()=>({kind:'name',template:tpl,word:$('#word').value.trim()||'Ism'});
+const logoBody=()=>({kind:'logo',n:+$('#l-n').value,text:$('#l-text').value.trim()||'Abc',font:$('#l-font').value,outer:$('#c-out').value,inner:$('#c-in').value,logo:$('#c-logo').value});
+async function order(body,title,btn){btn.disabled=true;hap('medium');try{const j=await api('/api/order',{...body,title,pack_kind:packKind});
+ if(j.status==='invoice')tg.openInvoice(j.link,s=>{if(s==='paid'){celebrate();setTimeout(()=>tg.showAlert("To'lov qabul qilindi. Emoji bot chatida tayyorlanadi.",()=>tg.close()),1100)}});
+ else{celebrate();setTimeout(()=>tg.showAlert('Tayyorlanmoqda — natija bot chatida.',()=>tg.close()),1100)}}catch(e){tg.showAlert(e.message)}btn.disabled=false}
+function tab(t){$$('section').forEach(s=>s.classList.toggle('hide',s.id!==t));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));hap();pill();
+ if(t==='admin')loadAdmin();else if(t==='profile'){renderProfile();profileExtras();countUp($('#profile'))}else if(t==='rank')renderTop();else prices();tr($('#'+t))}
+const hap=(t='light')=>tg.HapticFeedback&&tg.HapticFeedback.impactOccurred(t);
+try{tg.setHeaderColor('#080914');tg.setBackgroundColor('#080914')}catch(e){}
+addEventListener('pointermove',e=>{const s=document.documentElement.style;s.setProperty('--x',e.clientX+'px');s.setProperty('--y',e.clientY+'px')},{passive:true});
+function pill(){const b=$('nav button.on'),p=$('nav .pill');if(!b)return;p.style.width=b.offsetWidth+'px';p.style.transform='translateX('+b.offsetLeft+'px)'}
+addEventListener('resize',pill);
+function countUp(root){root.querySelectorAll('[data-n]').forEach(el=>{const n=+el.dataset.n;if(!n)return;let t0;const f=t=>{t0=t0||t;const k=Math.min(1,(t-t0)/700);el.textContent=Math.round(n*(1-Math.pow(1-k,3)));k<1&&requestAnimationFrame(f)};requestAnimationFrame(f)})}
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const D=[["Yasash","Создать","Create"],["Nimani yasaymiz?","Что создаём?","What do we create?"],["Ism emoji","Имя-эмодзи","Name emoji"],["Logo emoji","Лого-эмодзи","Logo emoji"],["Ismingiz animatsiyali emoji bo'ladi","Ваше имя станет анимированным эмодзи","Your name becomes an animated emoji"],["Matn va ranglardan logo","Логотип из текста и цветов","A logo from text and colors"],["Yuklanmoqda…","Загрузка…","Loading…"],["Raqam bo'yicha qidirish","Поиск по номеру","Search by number"],["Ism", "Имя", "Name"], ["Logo", "Логотип", "Logo"], ["Tekin", "Бесплатно", "Free"], ["Konkurs", "Конкурс", "Contest"], ["Profil", "Профиль", "Profile"], ["animatsiyali premium emoji studiyasi", "студия анимированных премиум-эмодзи", "animated premium emoji studio"], ["Ko'rish uchun so'z yozing", "Введите слово для превью", "Type a word to preview"], ["Shablon", "Шаблон", "Template"], ["Hammasi", "Все", "All"], ["So'z", "Слово", "Word"], ["To'plam nomi (Telegramda ko'rinadi)", "Название набора (видно в Telegram)", "Pack name (visible in Telegram)"], ["Qayerga qo'shamiz", "Куда добавить", "Add as"], ["Premium emoji", "Премиум-эмодзи", "Premium emoji"], ["Stikerlar", "Стикеры", "Stickers"], ["Buyurtma berish", "Заказать", "Order"], ["Ko'rish uchun matn yozing", "Введите текст для превью", "Type text to preview"], ["Shablon:", "Шаблон:", "Template:"], ["Matn", "Текст", "Text"], ["Shrift", "Шрифт", "Font"], ["Ranglar: tashqi · ichki · logo", "Цвета: внешний · внутренний · лого", "Colors: outer · inner · logo"], ["To'plam nomi", "Название набора", "Pack name"], ["Tekin imkoniyatlar", "Бесплатные попытки", "Free credits"], ["Har biri 1 ta emoji to'plamini bepul yasaydi", "Каждая — 1 набор бесплатно", "Each one makes 1 pack for free"], ["Do'st taklif qiling", "Пригласите друга", "Invite friends"], ["Ulashish", "Поделиться", "Share"], ["Nusxalash", "Копировать", "Copy"], ["Sotib olish", "Купить", "Buy"], ["Yordam", "Помощь", "Help"], ["Savol yoki muammo bo'lsa, adminga yozing.", "Есть вопрос — напишите админу.", "Questions? Message the admin."], ["Adminga yozish", "Написать админу", "Message admin"], ["Mening to'plamlarim", "Мои наборы", "My packs"], ["Til", "Язык", "Language"], ["Promokod", "Промокод", "Promo code"], ["Faollashtirish", "Активировать", "Activate"], ["Kodni kiriting", "Введите код", "Enter code"], ["Kunlik bonus", "Ежедневный бонус", "Daily bonus"], ["Har kuni 1 marta tekin imkoniyat oling", "Получайте бесплатную попытку каждый день", "Claim a free credit every day"], ["🏆 Eng faol yaratuvchilar", "🏆 Самые активные", "🏆 Top creators"], ["🤝 Eng ko'p do'st taklif qilganlar", "🤝 Больше всех друзей", "🤝 Top inviters"], ["Hali emoji yasamagansiz", "Вы ещё ничего не создавали", "Nothing created yet"], ["Ochish", "Открыть", "Open"], ["yasalgan", "создано", "created"], ["to'langan ⭐", "оплачено ⭐", "paid ⭐"], ["kredit", "попытки", "credits"], ["hozircha yo'q", "пока пусто", "nothing yet"]];
+let L='uz';try{L=localStorage.getItem('lang')||''}catch(e){}
+if(!['uz','ru','en'].includes(L))L=({ru:'ru',en:'en'})[((tg.initDataUnsafe.user||{}).language_code||'').slice(0,2)]||'uz';
+const TR={ru:Object.fromEntries(D.map(x=>[x[0],x[1]])),en:Object.fromEntries(D.map(x=>[x[0],x[2]]))};
+function tr(root){root=root||document.body;if(L==='uz')return;const m=TR[L],w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const s=n.nodeValue.trim();if(m[s])n.nodeValue=n.nodeValue.replace(s,m[s])}root.querySelectorAll('[placeholder]').forEach(e=>{const q=e.getAttribute('placeholder');if(m[q])e.setAttribute('placeholder',m[q])})}
+(function(){const d=document.createElement('div');d.className='dust';d.innerHTML=Array.from({length:14},()=>`<i style="left:${Math.random()*100}%;--dx:${(Math.random()-.5)*80}px;animation-duration:${8+Math.random()*10}s;animation-delay:${-Math.random()*12}s"></i>`).join('');document.body.prepend(d)})();
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('.go,.btn2');if(!b)return;const r=b.getBoundingClientRect(),s=document.createElement('span'),z=Math.max(r.width,r.height);s.className='rip';s.style.cssText=`width:${z}px;height:${z}px;left:${e.clientX-r.left-z/2}px;top:${e.clientY-r.top-z/2}px`;if(getComputedStyle(b).position==='static')b.style.position='relative';b.style.overflow='hidden';b.appendChild(s);setTimeout(()=>s.remove(),600)});
+document.addEventListener('pointermove',e=>{const t=e.target.closest&&e.target.closest('.stage,.prize');if(!t)return;const r=t.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;t.style.transform=`perspective(700px) rotateY(${x*10}deg) rotateX(${-y*10}deg)`});
+document.addEventListener('pointerout',e=>{const t=e.target.closest&&e.target.closest('.stage,.prize');if(t)t.style.transform=''});
+const CT={uz:{t:'Konkurs',pz:p=>`${p} ⭐ lik gift`,d:'kun',h:'soat',m:'daq',s:'son',need:(m,n)=>`Ishtirok uchun kamida ${m} ta emoji yasang (${n}/${m})`,inn:n=>`✅ Siz ishtirok etyapsiz · ${n} ta`,rule:"Eng ko'p emoji yasagan g'olib. Teng bo'lsa, tasodifiy tanlanadi. Gift bot balansidan yuboriladi.",end:'Konkurs yakunlandi',win:"G'olib",you:"🎉 Tabriklaymiz, g'olib siz ekansiz! Gift botdan yuboriladi.",ban:(p,n)=>`🏆 Konkurs · ${p} ⭐ gift · ${n} kun qoldi`,no:"Ishtirokchilar yo'q",pl:n=>`Ishtirokchilar: ${n}`},
+ru:{t:'Конкурс',pz:p=>`Подарок ${p} ⭐`,d:'дн',h:'час',m:'мин',s:'сек',need:(m,n)=>`Для участия создайте минимум ${m} набора (${n}/${m})`,inn:n=>`✅ Вы участвуете · ${n}`,rule:'Побеждает тот, кто создал больше всех. При равенстве — случайный выбор. Подарок отправит бот.',end:'Конкурс завершён',win:'Победитель',you:'🎉 Поздравляем, вы победили! Подарок придёт от бота.',ban:(p,n)=>`🏆 Конкурс · ${p} ⭐ · осталось ${n} дн`,no:'Участников нет',pl:n=>`Участники: ${n}`},
+en:{t:'Contest',pz:p=>`${p} ⭐ gift`,d:'day',h:'hr',m:'min',s:'sec',need:(m,n)=>`Create at least ${m} packs to enter (${n}/${m})`,inn:n=>`✅ You're in · ${n}`,rule:'Most packs wins. Ties are decided randomly. The bot sends the gift.',end:'Contest ended',win:'Winner',you:'🎉 Congrats, you won! The bot will send your gift.',ban:(p,n)=>`🏆 Contest · ${p} ⭐ gift · ${n} days left`,no:'No participants',pl:n=>`Players: ${n}`}};
+Object.assign(CT.uz,{how:'Qanday ishtirok etiladi',st1:'Ilovada emoji yasang',st2:m=>`Kamida ${m} ta to'plam yasang`,st3:p=>`Eng ko'p yasagan ${p} ⭐ lik giftni oladi`,rk:(r,t)=>`Sizning o'rningiz: #${r} / ${t}`,hist:"Oldingi g'oliblar",soon:'Konkurs tez orada boshlanadi'});
+Object.assign(CT.ru,{how:'Как участвовать',st1:'Создавайте эмодзи в приложении',st2:m=>`Создайте минимум ${m} набора`,st3:p=>`Больше всех — подарок ${p} ⭐`,rk:(r,t)=>`Ваше место: #${r} / ${t}`,hist:'Прошлые победители',soon:'Конкурс скоро начнётся'});
+Object.assign(CT.en,{how:'How to join',st1:'Create emojis in the app',st2:m=>`Make at least ${m} packs`,st3:p=>`The top creator gets a ${p} ⭐ gift`,rk:(r,t)=>`Your rank: #${r} / ${t}`,hist:'Past winners',soon:'The contest starts soon'});
+let cdT,lastC=null;
+const podium=(t,min)=>{const s=[[1,'🥈','p2'],[0,'👑','p1'],[2,'🥉','p3']].filter(x=>t[x[0]]);return `<div class="pod">${s.map(([i,m,c])=>`<div class="${c}${t[i].me?' me2':''}"><i>${m}</i><b>${esc(t[i].who)}</b><em>${t[i].n}${t[i].n>=min?' ✅':''}</em></div>`).join('')}</div>`};
+async function contestCard(){try{const c=lastC=await api('/api/contest'),T=CT[L];
+ const how=`<div class="card"><h3>📖 ${T.how}</h3><div class="stp"><div><b>1</b>${T.st1}</div><div><b>2</b>${T.st2(c.min)}</div><div><b>3</b>${T.st3(c.prize)}</div></div></div>`;
+ const hist=c.history&&c.history.length?`<div class="card"><h3>👑 ${T.hist}</h3>${c.history.map(x=>`<div class="lb"><b>${esc(x.who)}</b><em>${x.n} · ${x.prize} ⭐</em></div>`).join('')}</div>`:'';
+ if(c.none)return `<div class="prize"><div class="gift">🎁</div><h3 style="font-size:18px">${T.t} · ${T.pz(c.prize)}</h3><small>${T.soon}</small></div>${how}${hist}`;
+ const rest=c.top.slice(3).map((x,i)=>`<div class="lb${x.me?' me2':''}"><span>${i+4}</span><b>${esc(x.who)}</b><em>${x.n}${x.n>=c.min?' ✅':''}</em></div>`).join('');
+ const list=`<div class="card"><h3>🏆 ${T.t} · ${T.pl(c.players)}</h3>${c.top.length?podium(c.top,c.min)+rest:`<small>${T.no}</small>`}</div>`;
+ if(c.status==='active')return `<div class="prize"><div class="gift">🎁</div><h3 style="font-size:18px">${T.t} · ${T.pz(c.prize)}</h3><div class="cd" id="cd"></div><div class="bar"><i data-w="${Math.min(100,c.mine/c.min*100)}"></i></div><small>${c.mine>=c.min?T.inn(c.mine):T.need(c.min,c.mine)}</small>${c.rank?`<br><small>${T.rk(c.rank,c.total)}</small>`:''}<small style="display:block;margin-top:6px">${T.rule}</small></div>${how}${list}${hist}`;
+ if(c.you_won)setTimeout(celebrate,400);
+ return `<div class="prize"><div class="gift">🏆</div><h3 style="font-size:18px">${T.end}</h3>${c.winner?`<p style="margin-top:8px"><small>${T.win}</small><br><b style="font-size:20px;color:var(--ac)">${esc(c.winner)}</b></p>`:`<small>${T.no}</small>`}${c.you_won?`<p style="margin-top:8px">${T.you}</p>`:''}</div>${list}${hist}`}catch(e){return''}}
+function contestAfter(){clearInterval(cdT);requestAnimationFrame(()=>$$('.bar i').forEach(i=>i.style.width=i.dataset.w+'%'));const c=lastC;if(!c||c.status!=='active')return;const T=CT[L],f=()=>{let s=Math.max(0,c.end-(Date.now()/1000|0));const v=[[86400,T.d],[3600,T.h],[60,T.m],[1,T.s]].map(([k,l])=>{const n=Math.floor(s/k);s-=n*k;return `<div><b>${String(n).padStart(2,'0')}</b><small>${l}</small></div>`}).join(''),e=$('#cd');if(e)e.innerHTML=v;else clearInterval(cdT)};f();cdT=setInterval(f,1000)}
+const TH={name:{box:'#tpls',pend:new Set()},logo:{box:'#lgrid',pend:new Set()}};let mode=null;
+const thSig=k=>k==='name'?'n|'+($('#word').value.trim()||'Ism'):'l|'+[$('#l-text').value.trim()||'Abc',$('#l-font').value,$('#c-out').value,$('#c-in').value,$('#c-logo').value].join('|');
+const io=new IntersectionObserver(es=>{es.forEach(en=>{const c=en.target;if(en.isIntersecting&&c.dataset.ok!=='1')TH[c.dataset.kind].pend.add(c)});for(const k in TH)if(TH[k].pend.size){clearTimeout(TH[k].t);TH[k].t=setTimeout(()=>flush(k),150)}},{rootMargin:'80px'});
+function thReset(k){const box=$(TH[k].box);box.dataset.sig=thSig(k);TH[k].pend.clear();box.querySelectorAll('.tcard').forEach(c=>{if(c.dataset.k==='all')return;if(c._a){c._a.destroy();c._a=null}c.dataset.ok='';c.querySelector('.th').innerHTML='<small>Yuklanmoqda…</small>';io.unobserve(c);io.observe(c)});tr(box)}
+async function flush(k){const T=TH[k],box=$(T.box),sig=box.dataset.sig,cards=[...T.pend].filter(c=>c.dataset.ok!=='1').slice(0,8);cards.forEach(c=>T.pend.delete(c));if(!cards.length)return;
+ const body=k==='name'?{kind:'name',word:$('#word').value.trim()||'Ism'}:{kind:'logo',text:$('#l-text').value.trim()||'Abc',font:$('#l-font').value,outer:$('#c-out').value,inner:$('#c-in').value,logo:$('#c-logo').value};
+ try{const j=await api('/api/thumbs',{...body,items:cards.map(c=>c.dataset.k)});if(box.dataset.sig!==sig)return;
+  cards.forEach(c=>{const d=j.anims[c.dataset.k];if(!d)return;c.dataset.ok='1';const th=c.querySelector('.th');th.innerHTML='';c._a=lottie.loadAnimation({container:th,renderer:'svg',loop:true,autoplay:false,animationData:d});c._a.addEventListener('DOMLoaded',()=>{c.classList.contains('on')?c._a.play():c._a.goToAndStop(Math.floor(c._a.totalFrames*.4),true)})})}catch(e){}
+ if(T.pend.size)setTimeout(()=>flush(k),50)}
+function setSel(k,c){$$(TH[k].box+' .tcard').forEach(x=>{x.classList.toggle('on',x===c);if(x._a)x===c?x._a.play():x._a.pause()})}
+function setMode(m){mode=m;hap();$('#mk-pick').classList.add('hide');$('#mk-body').classList.remove('hide');$('#name').classList.toggle('hide',m!=='name');$('#logo').classList.toggle('hide',m!=='logo');$$('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));prices();thReset(m);m==='name'?preview(nameBody(),$('#st-name')):preview(logoBody(),$('#st-logo'))}
+document.addEventListener('click',e=>{const b=e.target.closest('#make [data-m]');if(b&&cfg)setMode(b.dataset.m)});
+function celebrate(){hap('heavy');for(let i=0;i<28;i++){const e=document.createElement('i');e.className='cf';e.textContent=['✨','🎉','⭐','💎','🎁'][i%5];e.style.left=Math.random()*100+'vw';e.style.animationDelay=Math.random()*.5+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}}
+function renderProfile(){const p=cfg.profile;$('#pf').innerHTML=`<div class="me"><div class="ava">${p.photo?`<img src="${esc(p.photo)}" alt="">`:esc((p.name||'?')[0])}</div><h2>${esc(p.name)}</h2><small>${p.username?'@'+esc(p.username):'id '+p.id}${cfg.free?' · bepul foydalanuvchi':''}${cfg.admin?' · admin':''}</small></div>
+<div class="stats" style="grid-template-columns:repeat(2,1fr)"><div><b data-n="${p.packs}">${p.packs}</b><small>yasalgan</small></div><div><b data-n="${p.stars}">${p.stars}</b><small>to'langan ⭐</small></div></div>
+<div class="card"><h3>Yordam</h3><small>Savol yoki muammo bo'lsa, adminga yozing.</small><button class="btn2" id="p-help" style="margin-top:10px">Adminga yozish</button></div>`;
+ $('#p-help').onclick=()=>{const c=cfg.support||'';c.startsWith('http')?tg.openLink(c):tg.openTelegramLink('https://t.me/'+c.replace('@',''))}}
+async function profileExtras(){const el=$('#pf2');el.innerHTML='';
+ el.insertAdjacentHTML('beforeend',`<div class="card"><h3>Mening to'plamlarim</h3><div id="mypk"><small>…</small></div></div><div class="card"><h3>Til</h3><div class="chips" id="langs">${['uz','ru','en'].map(l=>`<button data-l="${l}" class="${l===L?'on':''}">${l.toUpperCase()}</button>`).join('')}</div></div>`);
+ $('#langs').onclick=e=>{const l=e.target.dataset.l;if(l){try{localStorage.setItem('lang',l)}catch(x){}location.reload()}};
+ try{const j=await api('/api/packs');$('#mypk').innerHTML=j.packs.map(x=>`<div class="lb"><b>${esc(x.title)}</b><button class="btn2" data-u="${esc(x.url)}">Ochish</button></div>`).join('')||'<small>Hali emoji yasamagansiz</small>';
+  $('#mypk').onclick=e=>{const u=e.target.dataset.u;if(u)tg.openTelegramLink(u)}}catch(e){}tr(el)}
+async function renderTop(){const el=$('#rank');el.innerHTML='<div class="card"><small>…</small></div>';
+ try{const cc=await contestCard(),j=await api('/api/top'),R=(a,k)=>a.map((x,i)=>`<div class="lb"><span>${i+1}</span><b>${esc(x.who)}</b><em>${x.n}${k}</em></div>`).join('')||"<small>hozircha yo'q</small>";
+  el.innerHTML=cc+`<div class="card"><h3>🏆 Eng faol yaratuvchilar</h3>${R(j.packs,' ta')}</div>`;tr(el);contestAfter()}catch(e){el.textContent=e.message}}
+
+
+function gate(e){const d=e.data||{};
+ if(d.error==='maint'){document.body.innerHTML='<div class="card" style="margin-top:26vh;text-align:center"><h3>🛠 Ta\'mirlash ishlari</h3><small>Tez orada qaytamiz. Iltimos, keyinroq urinib ko\'ring.</small></div>';return}
+ if(d.error==='banned'){document.body.innerHTML='<div class="card" style="margin-top:30vh;text-align:center"><h3>🚫 Siz bloklangansiz</h3><small>Botdan foydalanish cheklangan.</small></div>';return}
+ if(d.error==='subscribe'){document.body.innerHTML=`<div class="card" style="margin-top:12vh;text-align:center"><h3>${d.left?'⚠️ Siz kanaldan chiqib ketdingiz':'📢 Kanalga obuna bo\'ling'}</h3><small>${d.left?'Kanalga obuna bo\'ling, shunda botdan foydalana olasiz.':'Botdan foydalanish uchun quyidagi kanallarga a\'zo bo\'ling.'}</small><div style="margin-top:14px;display:grid;gap:8px">${d.channels.map(c=>`<button class="btn2" data-ch="${esc(c)}">${esc(c)}</button>`).join('')}<button class="go" id="re">✅ Tekshirish</button></div></div>`;
+  document.body.onclick=ev=>{const c=ev.target.dataset.ch;if(c)tg.openTelegramLink('https://t.me/'+c.replace('@',''));if(ev.target.id==='re')location.reload()};return}
+ document.body.innerHTML='<div class="card" style="margin-top:14vh;text-align:center"><h3>Serverga ulanib bo\'lmadi</h3><small>'+esc(e.message)+'</small><br><br><small>API manzil: '+esc(window.API_BASE||'(bo\'sh — config.js yozilmagan)')+'</small><br><br><button class="btn2" onclick="location.reload()">Qayta urinish</button></div>'}
+const userCard=x=>`<div style="margin-top:12px"><b>${esc(x.name||"Noma'lum")}</b> ${x.username?'@'+esc(x.username):''}<br><small>id ${x.id}${x.started?'':" · botni ishga tushirmagan"}${x.admin?' · admin':''}</small>
+<div class="stats" style="grid-template-columns:repeat(2,1fr)"><div><b data-n="${x.packs}">${x.packs}</b><small>to'plam</small></div><div><b data-n="${x.stars}">${x.stars}</b><small>to'langan ⭐</small></div></div>
+<small>${x.banned?'🚫 bloklangan':'✅ faol'}</small><br><button class="btn2" style="margin-top:10px" data-uact="${x.banned?'unban':'ban'}" data-uid="${x.id}">${x.banned?'Blokdan chiqarish':'Bloklash'}</button></div>`;
+// ---------- Admin
+async function adm(action,value,kind){try{return await api('/api/admin',{action,value,kind})}catch(e){tg.showAlert(e.message)}}
+let aTab='stats',aData=null;
+async function loadAdmin(a){aData=a||await adm('overview');if(aData)drawAdmin()}
+function drawAdmin(){const a=aData,el=$('#admin');
+ const tabs=[['stats','📊 Statistika'],['users','👥 Odamlar'],['cn','🏆 Konkurs'],['ch','📢 Kanallar'],['set','⚙️ Sozlama'],['msg','📣 Xabar']];
+ const tag=(i,del)=>`<span class="tag">${i}<b data-del="${del}" data-v="${i}">×</b></span>`,none="<small>yo'q</small>";
+ const lb=(l,k)=>l.map((x,i)=>`<div class="lb"><span>${i+1}</span><b>${esc(x.who)}</b><em>${x.n}${k}</em></div>`).join('')||none;
+ const kpi=(ic,n,l)=>`<div class="kpi"><i>${ic}</i><b data-n="${n}">${n}</b><small>${l}</small></div>`,mx=Math.max(1,...a.chart.map(x=>x.n));
+ let b='';
+ if(aTab==='stats')b=`<div class="kpis">${kpi('👥',a.users,'foydalanuvchi')}${kpi('⚡',a.today,'bugun yasaldi')}${kpi('📦',a.packs_total,"jami to'plam")}${kpi('⭐',a.stars_total,'jami tushum')}</div>
+ <div class="card"><h3>📈 7 kunlik faollik</h3><div class="chart">${a.chart.map(x=>`<div><i style="--h:${Math.round(x.n/mx*100)}%"><b>${x.n}</b></i><small>${x.d}</small></div>`).join('')}</div></div>
+ <div class="card"><h3>🧾 So'nggi buyurtmalar</h3>${a.orders.map(o=>`<div class="lb"><span>${o.k==='logo'?'🎨':'✍️'}</span><b>id ${o.u}</b><em class="${o.s}">${o.p} ⭐ ${o.s==='done'?'✅':'⏳'}</em></div>`).join('')||none}</div>
+ <div class="card"><h3>🏆 Eng ko'p yasaganlar</h3>${lb(a.top_packs,' ta')}</div><div class="card"><h3>💎 Eng ko'p to'laganlar</h3>${lb(a.top_stars,' ⭐')}</div>`;
+ else if(aTab==='users')b=`<div class="card"><h3>🔎 Foydalanuvchini qidirish</h3><div class="row"><input type="number" id="u-id" placeholder="user_id"><button class="btn2" data-usearch="1">Qidirish</button></div><div id="u-res"></div></div><div class="card"><h3>🚫 Bloklanganlar</h3>${a.banned.map(i=>tag(i,'ban')).join('')||none}</div>${a.admins?`<div class="card"><h3>👑 Adminlar</h3>${a.admins.map(i=>tag(i,'admin')).join('')||none}<div class="row" style="margin-top:8px"><input type="number" id="a-admin" placeholder="user_id"><button class="btn2" data-add="admin">Qo'shish</button></div></div>`:''}`;
+ else if(aTab==='cn'){const c=a.contest;b=`<div class="card"><h3>🏆 Konkurs</h3><div class="row" style="margin:8px 0"><span>Avtomatik konkurs (30 kun · 15 ⭐ · 5 ta)</span><div class="sw ${a.auto?'on':''}" data-auto="${a.auto?0:1}"></div></div>`+(c&&c.status==='active'?`<small>Tugaydi: ${new Date(c.end*1000).toLocaleString()}<br>Sovrin: ${c.prize} ⭐ · shart: kamida ${c.min} ta · ishtirokchilar: ${c.players}</small><button class="go" data-cstop="1">Hozir yakunlash</button>`:(c?`<small>Yakunlangan · g'olib: ${c.winner?'id '+c.winner:"yo'q"} · gift: ${c.gift_sent?'yuborilgan ✅':(c.winner?'yuborilmagan ⚠️ '+esc(c.note||''):'—')}</small>${c.winner&&!c.gift_sent?'<button class="go" data-cretry="1">Giftni qayta yuborish</button>':''}`:"<small>Hali konkurs yo'q</small>")+`<small style="display:block;margin-top:12px">Yangi konkurs: kun · gift ⭐ · minimal emoji</small><div class="row" style="margin-top:8px"><input type="number" id="cn-d" value="30" min="1"><input type="number" id="cn-p" value="15" min="1"><input type="number" id="cn-m" value="5" min="1"></div><button class="go" data-cstart="1">Konkursni boshlash</button>`)+`</div>`}
+ else if(aTab==='ch')b=`<div class="card"><h3>📢 Majburiy kanallar</h3><small>Bot kanalda admin bo'lishi shart. O'chirish uchun «off» yozing.</small><textarea id="a-ch" rows="3" placeholder="@kanal1 @kanal2" style="margin-top:8px">${esc(a.channels)}</textarea><button class="go" data-save="channels">Saqlash</button></div>`;
+ else if(aTab==='set')b=`<div class="card"><h3>💰 Narxlar (⭐)</h3>${['name','logo'].map(k=>`<div class="row" style="margin-top:8px"><span>${{name:'Ism emoji',logo:'Logo emoji'}[k]}</span><input type="number" min="1" value="${a.prices[k]}" data-price="${k}"><button class="btn2" data-save="${k}">OK</button></div>`).join('')}<small style="display:block;margin-top:8px">Narx o'zgarsa, log kanalga xabar boradi.</small></div><div class="card"><h3>💬 Yordam kontakti</h3><div class="row"><input type="text" id="a-sup" value="${esc(a.support)}"><button class="btn2" data-save="support">OK</button></div></div><div class="card"><div class="row"><div><h3>🛠 Ta'mirlash rejimi</h3><small>Yoqilsa, oddiy foydalanuvchilar botdan foydalana olmaydi.</small></div><div class="sw ${a.maint?'on':''}" data-maint="${a.maint?0:1}"></div></div></div>`;
+ else b=`<div class="card"><h3>📣 Hammaga xabar</h3><small>${a.users} ta foydalanuvchiga yuboriladi (bloklanganlardan tashqari).</small><textarea id="a-msg" rows="5" maxlength="1000" placeholder="Xabar matni" style="margin-top:10px"></textarea><button class="go" data-bc="1">Yuborish</button></div>`;
+ el.innerHTML=`<div class="adm-h"><b>🛠 Admin panel</b><small>${a.owner?'Egasi':'Admin'}</small></div><div class="sub">${tabs.map(t=>`<button data-at="${t[0]}" class="${aTab===t[0]?'on':''}">${t[1]}</button>`).join('')}</div>${b}`;countUp(el)}
+$('#admin').addEventListener('click',async e=>{const t=e.target.closest('[data-at],[data-del],[data-add],[data-save],[data-usearch],[data-uact],[data-bc],[data-cstart],[data-cstop],[data-cretry],[data-auto],[data-maint]');if(!t)return;const d=t.dataset;let r;hap();
+ if(d.at){aTab=d.at;drawAdmin();return}
+ if(d.del==='ban'){await adm('unban',d.v);return loadAdmin()}
+ if(d.del)r=await adm(d.del+'_del',d.v);
+ else if(d.add)r=await adm(d.add+'_add',$('#a-'+d.add).value);
+ else if(['name','logo'].includes(d.save))r=await adm('price',$(`[data-price=${d.save}]`).value,d.save);
+ else if(d.save==='channels')r=await adm('channels',$('#a-ch').value);
+ else if(d.save==='support')r=await adm('support',$('#a-sup').value);
+ else if(d.auto!==undefined)r=await adm('auto_set',d.auto);
+ else if(d.maint!==undefined)r=await adm('maint_set',d.maint);
+ else if(d.cstart)r=await adm('contest_start',$('#cn-d').value,$('#cn-p').value+':'+$('#cn-m').value);
+ else if(d.cstop)return tg.showConfirm("Konkurs hozir yakunlanib, g'olib aniqlanadi. Davom etamizmi?",async ok=>{if(ok){const x=await adm('contest_stop');if(x){aData=x;drawAdmin()}}});
+ else if(d.cretry)r=await adm('contest_retry');
+ else if(d.usearch){const j=await adm('user_info',$('#u-id').value);if(j){$('#u-res').innerHTML=userCard(j.user);countUp($('#u-res'))}return}
+ else if(d.uact){const j=await adm(d.uact,d.uid);if(j)$('#u-res').innerHTML=userCard(j.user);return}
+ else if(d.bc){const x=$('#a-msg').value.trim();if(!x)return tg.showAlert('Xabar yozing');return tg.showConfirm(`Xabar ${aData.users} ta foydalanuvchiga yuboriladi. Davom etamizmi?`,async ok=>{if(ok&&await adm('broadcast',x)){$('#a-msg').value='';tg.showAlert('Yuborish boshlandi. Tugagach sizga xabar keladi.')}})}
+ if(r){aData=r;drawAdmin();tg.HapticFeedback&&tg.HapticFeedback.notificationOccurred('success')}});
+// ---------- Init
+(async()=>{try{cfg=await api('/api/config')}catch(e){gate(e);return}
+ if(cfg.admin)$('nav [data-t=admin]').classList.remove('hide');
+ $('#tpls').innerHTML=[{key:'all'},...cfg.templates].map(t=>t.key==='all'?`<button class="tcard on" data-kind="name" data-k="all"><div class="th"><b style="font-size:24px">🌈</b><small style="animation:none">Hammasi</small></div></button>`:`<button class="tcard" data-kind="name" data-k="${t.key}"><div class="th"><small>Yuklanmoqda…</small></div></button>`).join('');
+ $('#word').maxLength=cfg.max_len;$('#lgrid').innerHTML=Array.from({length:cfg.logo_count},(_,i)=>`<button class="tcard${i?'':' on'}" data-kind="logo" data-k="${i+1}"><div class="th"><small>Yuklanmoqda…</small></div></button>`).join('');
+ $('#l-font').innerHTML=cfg.fonts.map(f=>`<option value="${f.key}">${f.label}</option>`).join('');$('#l-font').value='classic';
+ $$('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+ $('#tpls').onclick=e=>{const c=e.target.closest('[data-k]');if(!c)return;tpl=c.dataset.k;hap();setSel('name',c);prices();debounced('n',()=>preview(nameBody(),$('#st-name')))};
+ $('#packs').onclick=e=>{if(!e.target.dataset.v)return;packKind=e.target.dataset.v;$$('#packs button').forEach(b=>b.classList.toggle('on',b===e.target))};
+ $('#word').oninput=()=>{debounced('nt',()=>thReset('name'));debounced('n',()=>preview(nameBody(),$('#st-name')))};
+ const lp=()=>{$('#l-num').textContent=$('#l-n').value;debounced('lt',()=>thReset('logo'));debounced('l',()=>preview(logoBody(),$('#st-logo')))};
+ $('#lgrid').onclick=e=>{const c=e.target.closest('[data-k]');if(!c)return;$('#l-n').value=c.dataset.k;$('#l-num').textContent=c.dataset.k;hap();setSel('logo',c);debounced('l',()=>preview(logoBody(),$('#st-logo')))};
+ $('#l-q').oninput=()=>{const q=$('#l-q').value.trim();$$('#lgrid .tcard').forEach(c=>c.hidden=!!q&&!c.dataset.k.startsWith(q))};
+ ['#l-n','#l-text','#l-font','#c-out','#c-in','#c-logo'].forEach(s=>$(s).oninput=lp);
+ $('#n-go').onclick=()=>$('#word').value.trim()?order(nameBody(),$('#n-title').value,$('#n-go')):tg.showAlert("So'z yozing");
+ $('#l-go').onclick=()=>$('#l-text').value.trim()?order(logoBody(),$('#l-title').value,$('#l-go')):tg.showAlert('Matn yozing');
+ if(cfg.contest){const T=CT[L],dl=Math.max(1,Math.ceil((cfg.contest.end-Date.now()/1000)/86400));$('#make').insertAdjacentHTML('afterbegin',`<button class="banner" id="cbn">${T.ban(cfg.contest.prize,dl)}</button>`);$('#cbn').onclick=()=>tab('rank')}
+ prices();tr();requestAnimationFrame(pill);if(new URLSearchParams(location.search).get('tab')==='admin'&&cfg.admin)tab('admin')})();
+</script></body></html>

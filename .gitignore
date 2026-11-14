@@ -1,0 +1,38 @@
+# Muhit va keshlar
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Ish vaqtidagi ma'lumotlar (serverda hosil bo'ladi, GitHub'ga YUKLANMAYDI)
+users.json
+credits.json
+allowed_users.json
+admins.json
+emoji_pack.json
+referrals.json
+settings.json
+stats.json
+refund_requests.json
+price_*.json
+anonim_emoji.lock
+bot.log
+output/
+data/
+
+# Vaqtinchalik / zaxira fayllar
+*.bak
+*.bak2
+*.tmp
+fix.py
+patch_gift.py
+_tmp_check.py
+
+# Serverga ulanish skripti (faqat sizning kompyuteringizda)
+start_bot.py
+webapp_orders.json
+banned.json
+sub_state.json
+app_data.json
+heartbeat.json

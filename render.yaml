@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: anonim-emoji
+    runtime: python
+    plan: starter            # doimiy ishlashi va Disk uchun (free uxlab qoladi)
+    buildCommand: pip install -r requirements.txt
+    startCommand: python anonim_emoji.py
+    healthCheckPath: /
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_ID
+        value: "8587976365"
+      - key: LOG_CHAT_ID
+        value: "-1004429695608"
+      - key: DATA_DIR
+        value: /var/data
+      - key: PYTHON_VERSION
+        value: 3.12.8
